@@ -1,4 +1,4 @@
-import { AuthContext } from '@/contexts/AuthContext';
+import useUserStore from '@/store/userStore';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import MenuIcon from '@mui/icons-material/Menu';
 import NotificationsActiveOutlinedIcon from '@mui/icons-material/NotificationsActiveOutlined';
@@ -36,7 +36,7 @@ const AppBar = styled(MuiAppBar, {
 
 const Navbar = ({ open, setOpen }: { open: boolean; setOpen: Dispatch<SetStateAction<boolean>> }) => {
   const navigate = useNavigate();
-  const { logout, user } = useContext(AuthContext);
+  const { logout, user } = useUserStore();
   const handleDrawerOpen = () => {
     setOpen(true);
   };

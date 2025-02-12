@@ -1,10 +1,10 @@
-import { AuthContext } from '@/contexts/AuthContext';
+import useUserStore from '@/store/userStore';
 import React, { useContext, useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import AppLayout from './AppLayout/AppLayout';
 
 const ProtectedRoutes: React.FC = () => {
-  const { isAuthenticated, logout } = useContext(AuthContext);
+  const { isAuthenticated, logout } = useUserStore();
   const navigate = useNavigate();
 
   useEffect(() => {
