@@ -17,6 +17,7 @@ import {
   Typography
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 
 interface Task {
   id: string;
@@ -28,32 +29,40 @@ interface Task {
 }
 
 interface Project {
-  id?: string;
+  id: string;
   name: string;
   description: string;
-  isActive?: boolean;
-  tasks?: Task[];
+  isActive: boolean;
+  tasks: Task[];
+}
+
+interface AddProjectFormInitVal {
+  name: string;
+  description: string;
+  projectId?: string;
 }
 
 const ProjectsTable = () => {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [newProject, setNewProject] = useState<Project>({ name: '', description: '' });
+  // newProject is used to add new project and its a form state
+  const [newProject, setNewProject] = useState<AddProjectFormInitVal>({ name: '', description: '', projectId: '' });
   const [openDialog, setOpenDialog] = useState(false);
-  const [openEditDialog, setOpenEditDialog] = useState(false);
-  const [projectToEdit, setProjectToEdit] = useState<Project | null>(null);
   const { user } = React.useContext(AuthContext);
 
-  useEffect(() => {
-    async function fetchProjects() {
-      try {
-        const response = await httpInstance.get('/projects');
-        setProjects(response.data);
-      } catch (error) {
-        console.error('Error fetching projects:', error);
-      }
+  async function fetchProjects() {
+    try {
+      const response = await httpInstance.get('/projects');
+      setProjects(response.data);
+    } catch (error) {
+      console.error('Error fetching projects:', error);
     }
+  }
+  useEffect(() => {
     fetchProjects();
   }, []);
+
+  // is user editing or adding
+  // if we have project id in our newProject, then user is editing
 
   const handleAddProject = async () => {
     if (user.role !== 'MANAGER') {
@@ -61,18 +70,28 @@ const ProjectsTable = () => {
       return;
     }
 
+    let payload = newProject;
+
+    if (!newProject?.projectId) {
+      // this is ADD case
+      payload = {
+        name: newProject.name,
+        description: newProject.description
+      };
+    }
+
     try {
-      const response = await httpInstance.post('/projects', newProject, {
+      await httpInstance.post('/projects', payload, {
         headers: {
           Authorization: `Bearer ${user.token}`
         }
       });
-      console.log(newProject);
-      setProjects((prev) => [...prev, response.data]);
+      fetchProjects();
       setNewProject({ name: '', description: '' });
       setOpenDialog(false);
+      newProject?.projectId ? toast.success('Project updated successfully.') : toast.success('Project added successfully.');
     } catch (error) {
-      console.error('Error adding project:', error);
+      newProject?.projectId ? toast.error('Error while updating') : toast.success('Error while adding');
     }
   };
 
@@ -85,22 +104,9 @@ const ProjectsTable = () => {
     }
   };
 
-  const handleEditProject = async () => {
-    if (projectToEdit) {
-      try {
-        const response = await httpInstance.put(`/projects/${projectToEdit.id}`, projectToEdit);
-        setProjects((prev) => prev.map((project) => (project.id === projectToEdit.id ? response.data : project)));
-        setProjectToEdit(null);
-        setOpenEditDialog(false);
-      } catch (error) {
-        console.error('Error editing project:', error);
-      }
-    }
-  };
-
-  const openEditDialogHandler = (project: Project) => {
-    setProjectToEdit(project);
-    setOpenEditDialog(true);
+  const handleEdit = (project: Project) => {
+    setNewProject({ name: project.name, description: project.description, projectId: project.id });
+    setOpenDialog(true);
   };
 
   return (
@@ -129,40 +135,16 @@ const ProjectsTable = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-          <Button onClick={handleAddProject} variant='contained'>
-            Add
+          <Button
+            onClick={() => {
+              setOpenDialog(false);
+              setNewProject({ name: '', description: '', projectId: '' });
+            }}
+          >
+            Cancel
           </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Edit Project Dialog */}
-      <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
-        <DialogTitle>Edit Project</DialogTitle>
-        <DialogContent>
-          {projectToEdit && (
-            <>
-              <TextField
-                fullWidth
-                label='Project Name'
-                value={projectToEdit.name}
-                onChange={(e) => setProjectToEdit({ ...projectToEdit, name: e.target.value })}
-                margin='dense'
-              />
-              <TextField
-                fullWidth
-                label='Description'
-                value={projectToEdit.description}
-                onChange={(e) => setProjectToEdit({ ...projectToEdit, description: e.target.value })}
-                margin='dense'
-              />
-            </>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenEditDialog(false)}>Cancel</Button>
-          <Button onClick={handleEditProject} variant='contained'>
-            Save
+          <Button onClick={handleAddProject} variant='contained'>
+            {newProject?.projectId ? 'Update' : 'Add'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -192,7 +174,7 @@ const ProjectsTable = () => {
                   <TableCell>{project.description}</TableCell>
                   <TableCell>{project.isActive ? 'Active' : 'Inactive'}</TableCell>
                   <TableCell>
-                    <Button onClick={() => openEditDialogHandler(project)}>Edit</Button>
+                    <Button onClick={() => handleEdit(project)}>Edit</Button>
                     <Button disabled={!project.id} onClick={() => handleDeleteProject(project?.id || '')} color='error'>
                       Delete
                     </Button>
