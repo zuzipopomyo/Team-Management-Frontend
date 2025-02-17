@@ -1,4 +1,4 @@
-import { AuthContext } from '@/contexts/AuthContext';
+import useUserStore from '@/store/userStore';
 import BookmarkBorderOutlinedIcon from '@mui/icons-material/BookmarkBorderOutlined';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -51,7 +51,7 @@ export default function Sidebar({ open, setOpen }: { open: boolean; setOpen: Rea
   const theme = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = React.useContext(AuthContext);
+  const { user } = useUserStore();
 
   // 1. Make components for each sidebar item
   //   // 2. Make routes in router file as child routes of protected routes

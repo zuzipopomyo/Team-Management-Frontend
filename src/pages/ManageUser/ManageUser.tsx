@@ -25,7 +25,7 @@ interface User {
   name: string;
   email: string;
   password: string;
-  role: 'USER' | 'ADMIN';
+  role: 'USER' | 'MANAGER';
 }
 
 const ManageUser: React.FC = () => {
@@ -101,7 +101,7 @@ const ManageUser: React.FC = () => {
                 <TableCell>{user.email}</TableCell>
                 <TableCell
                   sx={{
-                    color: user.role === 'ADMIN' ? 'green' : user.role === 'USER' ? 'blue' : 'inherit'
+                    color: user.role === 'MANAGER' ? 'green' : user.role === 'USER' ? 'blue' : 'inherit'
                   }}
                 >
                   {user.role}
@@ -146,7 +146,7 @@ const ManageUser: React.FC = () => {
             type='text'
             fullWidth
             value={editingUser?.role || ''}
-            onChange={(e) => setEditingUser((prev) => (prev ? { ...prev, role: e.target.value as 'USER' | 'ADMIN' } : null))}
+            onChange={(e) => setEditingUser((prev) => (prev ? { ...prev, role: e.target.value as 'USER' | 'MANAGER' } : null))}
           />
         </DialogContent>
         <DialogActions>

@@ -99,8 +99,8 @@ const Register: React.FC = () => {
               defaultValue='USER'
               render={({ field }) => (
                 <Select {...field} labelId='role-label' value={field.value} onChange={(event) => field.onChange(event.target.value)}>
-                  <MenuItem value='ADMIN'>ADMIN</MenuItem>
-                  <MenuItem value='USER'>USER</MenuItem>
+                  <MenuItem value='MANAGER'>Manager</MenuItem>
+                  <MenuItem value='USER'>User</MenuItem>
                 </Select>
               )}
             />

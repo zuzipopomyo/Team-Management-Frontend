@@ -1,5 +1,5 @@
 import { httpInstance } from '@/apis/config/httpInstance';
-import { AuthContext } from '@/contexts/AuthContext';
+import useUserStore from '@/store/userStore';
 import { ApiMessages, ROUTE, ValidationMessages } from '@/utils/constants';
 import { Box, Button, Container, Typography } from '@mui/material';
 import axios from 'axios';
@@ -13,7 +13,7 @@ const Login: React.FC = () => {
   const methods = useForm<LoginFormInputs>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
-  const { login } = useContext(AuthContext);
+  const { login } = useUserStore();
 
   const onSubmit = async (data: LoginFormInputs) => {
     setIsSubmitting(true);

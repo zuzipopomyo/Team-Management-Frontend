@@ -76,15 +76,17 @@ interface TaskCardProps {
   date: string;
 }
 
+type TUser = {
+  id: string;
+  name: string;
+  email: string;
+  role: 'ADMIN' | 'USER';
+  phoneNumber: string;
+};
+
 type TRegisterRes = {
   data: {
-    user: {
-      id: number;
-      email: string;
-      name: string;
-      role: 'USER' | 'ADMIN';
-      isEmailVerified: boolean;
-    };
+    user: TUser;
     tokens: {
       access: {
         token: string;
