@@ -66,7 +66,7 @@ export default function Sidebar({ open, setOpen }: { open: boolean; setOpen: Rea
   const sidebarItems = [
     { title: 'Home', route: '/home' },
     { title: 'Plans', route: '/plans' },
-    { title: 'History', route: '/history' },
+    { title: 'Projects', route: '/projects' },
     { title: 'ManageUser', route: '/manageuser' }
   ];
 
