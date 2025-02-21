@@ -1,13 +1,16 @@
 import { httpInstance } from '@/apis/config/httpInstance';
 import useUserStore from '@/store/userStore';
+import { Add } from '@mui/icons-material';
 import {
   Avatar,
   AvatarGroup,
   Button,
+  Container,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  IconButton,
   Paper,
   Table,
   TableBody,
@@ -18,9 +21,10 @@ import {
   TextField,
   Typography
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import AssignUsersModel from './AssignUsersModel';
 
 interface Task {
   id: string;
@@ -31,19 +35,13 @@ interface Task {
   endDate: string;
 }
 
-interface AssignedUser {
-  id: string;
-  name: string;
-  avatar: string;
-}
-
 interface Project {
   id: string;
   name: string;
   description: string;
   isActive: boolean;
   tasks: Task[];
-  assignedUsers?: AssignedUser[];
+  users?: TUser[];
 }
 
 interface AddProjectFormInitVal {
@@ -58,6 +56,9 @@ const ProjectsTable = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
+  const [showAssignUser, setShowAssignUser] = useState(false);
+  const [assignedUsers, setAssignedUsers] = useState<TUser[]>([]);
+
   const { user } = useUserStore();
   const navigate = useNavigate();
 
@@ -115,8 +116,12 @@ const ProjectsTable = () => {
   };
 
   return (
-    <>
-      <Button sx={{ ml: 'auto', mb: '30px', display: 'block', border: '1px solid black', px: '30px' }} onClick={() => setOpenDialog(true)}>
+    <Container sx={{ mt: 2 }}>
+      <Button
+        variant='contained'
+        sx={{ ml: 'auto', mb: '30px', display: 'block', border: '1px solid black', px: '30px' }}
+        onClick={() => setOpenDialog(true)}
+      >
         Add Project
       </Button>
 
@@ -173,10 +178,18 @@ const ProjectsTable = () => {
                   <TableCell>{project.isActive ? 'Active' : 'Inactive'}</TableCell>
                   <TableCell>{project.tasks.length}</TableCell>
                   <TableCell>
-                    <AvatarGroup max={3}>
-                      {project.assignedUsers?.map((user) => (
-                        <Avatar key={user.id} src={user.avatar} alt={user.name} />
+                    <AvatarGroup sx={{ justifyContent: 'start' }} max={3}>
+                      {project.users?.map((user) => (
+                        <Avatar key={user.id} src={user.name} alt={user.name} />
                       ))}
+                      <IconButton
+                        onClick={() => {
+                          setShowAssignUser(true);
+                          setAssignedUsers(project?.users || []);
+                        }}
+                      >
+                        <Add />
+                      </IconButton>
                     </AvatarGroup>
                   </TableCell>
                   <TableCell>
@@ -193,6 +206,10 @@ const ProjectsTable = () => {
         </Table>
       </TableContainer>
 
+      {showAssignUser && (
+        <AssignUsersModel assignedUsers={assignedUsers} setShowAssignUser={setShowAssignUser} showAssignUser={showAssignUser} />
+      )}
+
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
@@ -205,7 +222,7 @@ const ProjectsTable = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </>
+    </Container>
   );
 };
 
