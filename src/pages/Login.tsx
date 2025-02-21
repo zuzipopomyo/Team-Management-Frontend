@@ -1,17 +1,24 @@
 import { httpInstance } from '@/apis/config/httpInstance';
 import useUserStore from '@/store/userStore';
+import { theme, themeColors } from '@/theme/theme';
 import { ApiMessages, ROUTE, ValidationMessages } from '@/utils/constants';
+import LockIcon from '@mui/icons-material/Lock';
 import { Box, Button, Container, Typography } from '@mui/material';
 import axios from 'axios';
-import React, { useContext, useState } from 'react';
+import cn from 'classnames';
+import React, { useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import InputComponent from '../components/InputComponent';
+import styles from './login.module.css';
 
 const Login: React.FC = () => {
   const methods = useForm<LoginFormInputs>();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const {
+    formState: { errors }
+  } = methods;
   const navigate = useNavigate();
   const { login } = useUserStore();
 
@@ -31,10 +38,8 @@ const Login: React.FC = () => {
       methods.reset();
     } catch (error: any) {
       if (axios.isAxiosError(error)) {
-        console.error('Axios error:', error.response?.data || error.message);
         toast.error(error.response?.data?.message || ApiMessages.Error.common);
       } else {
-        console.error('Unexpected error:', error);
         toast.error(ApiMessages.Error.common);
       }
     } finally {
@@ -56,29 +61,21 @@ const Login: React.FC = () => {
         <Box
           component='form'
           onSubmit={methods.handleSubmit(onSubmit)}
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            padding: 6,
-            bgcolor: 'white',
-            borderRadius: 5,
-            boxShadow: 3,
-            width: '100%',
-            maxWidth: '350px'
-          }}
+          className={cn(styles.loginForm, (errors?.password || errors?.email) && styles.loginFormError, 'glassBackground')}
         >
+          <LockIcon className={styles.lockIcon} />
           <Typography
             variant='h4'
             gutterBottom
             sx={{
-              borderLeft: '6px solid #F7D542',
+              borderLeft: '6px solid' + themeColors.primary,
               paddingLeft: 1,
               fontWeight: 'bold',
-              fontSize: '35px'
+              fontSize: '35px',
+              color: themeColors.primary
             }}
           >
-            Weekly-Kanban
+            Team Management
           </Typography>
 
           <InputComponent
@@ -105,13 +102,10 @@ const Login: React.FC = () => {
           <Button
             type='submit'
             variant='contained'
+            fullWidth
             sx={{
               mt: 3,
-              padding: '15px 0',
-              bgcolor: '#FEAF00',
-              color: '#FFFFFF',
-              '&:hover': { bgcolor: '#FEAF00' },
-              width: '100%'
+              padding: '15px 0'
             }}
             disabled={isSubmitting}
           >
@@ -122,7 +116,6 @@ const Login: React.FC = () => {
             onClick={() => navigate('/register')}
             sx={{
               mt: 2,
-              color: '#FEAF00',
               textDecoration: 'underline',
               fontSize: '14px'
             }}
