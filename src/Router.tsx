@@ -7,8 +7,8 @@ import Home from './pages/Home/Home';
 import Login from './pages/Login';
 // import Plans from './pages/Plans/Plans';
 import Projects from './pages/Projects/Projects';
+import ViewScreen from './pages/Projects/ViewProject';
 import Register from './pages/Register';
-
 const AppRouter: React.FC = () => {
   const isUserLoggedIn = !!localStorage.getItem('accessToken');
 
@@ -23,6 +23,7 @@ const AppRouter: React.FC = () => {
           {/* <Route path='plans' element={<Plans />}></Route> */}
           <Route path='projects' element={<Projects />}></Route>
           <Route path='manageuser' element={<ManageUsers />}></Route>
+          <Route path='/viewProject/:projectId' element={<ViewScreen />} />
         </Route>
       </Routes>
     </BrowserRouter>

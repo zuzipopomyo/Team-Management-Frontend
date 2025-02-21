@@ -1,6 +1,8 @@
 import { httpInstance } from '@/apis/config/httpInstance';
-import { AuthContext } from '@/contexts/AuthContext';
+import useUserStore from '@/store/userStore';
 import {
+  Avatar,
+  AvatarGroup,
   Button,
   Dialog,
   DialogActions,
@@ -17,6 +19,7 @@ import {
   Typography
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 interface Task {
@@ -28,12 +31,19 @@ interface Task {
   endDate: string;
 }
 
+interface AssignedUser {
+  id: string;
+  name: string;
+  avatar: string;
+}
+
 interface Project {
   id: string;
   name: string;
   description: string;
   isActive: boolean;
   tasks: Task[];
+  assignedUsers?: AssignedUser[];
 }
 
 interface AddProjectFormInitVal {
@@ -44,10 +54,16 @@ interface AddProjectFormInitVal {
 
 const ProjectsTable = () => {
   const [projects, setProjects] = useState<Project[]>([]);
-  // newProject is used to add new project and its a form state
-  const [newProject, setNewProject] = useState<AddProjectFormInitVal>({ name: '', description: '', projectId: '' });
+  const [newProject, setNewProject] = useState<AddProjectFormInitVal>({ name: '', description: '' });
   const [openDialog, setOpenDialog] = useState(false);
-  const { user } = React.useContext(AuthContext);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
+  const { user } = useUserStore();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
 
   async function fetchProjects() {
     try {
@@ -57,51 +73,40 @@ const ProjectsTable = () => {
       console.error('Error fetching projects:', error);
     }
   }
-  useEffect(() => {
-    fetchProjects();
-  }, []);
-
-  // is user editing or adding
-  // if we have project id in our newProject, then user is editing
 
   const handleAddProject = async () => {
-    if (user.role !== 'MANAGER') {
+    if (user?.role !== 'MANAGER') {
       alert('Only managers can add projects.');
       return;
     }
 
-    let payload = newProject;
-
-    if (!newProject?.projectId) {
-      // this is ADD case
-      payload = {
-        name: newProject.name,
-        description: newProject.description
-      };
-    }
-
     try {
-      await httpInstance.post('/projects', payload, {
-        headers: {
-          Authorization: `Bearer ${user.token}`
-        }
-      });
+      await httpInstance.post('/projects', newProject);
       fetchProjects();
       setNewProject({ name: '', description: '' });
       setOpenDialog(false);
-      newProject?.projectId ? toast.success('Project updated successfully.') : toast.success('Project added successfully.');
+      toast.success(newProject?.projectId ? 'Project updated successfully.' : 'Project added successfully.');
     } catch (error) {
-      newProject?.projectId ? toast.error('Error while updating') : toast.success('Error while adding');
+      toast.error(newProject?.projectId ? 'Error while updating' : 'Error while adding');
     }
   };
 
-  const handleDeleteProject = async (id: string) => {
+  const handleConfirmDelete = async () => {
+    if (!projectToDelete) return;
     try {
-      await httpInstance.delete(`/projects/${id}`);
-      setProjects((prev) => prev.filter((project) => project.id !== id));
+      await httpInstance.delete(`/projects/${projectToDelete}`);
+      setProjects((prev) => prev.filter((project) => project.id !== projectToDelete));
+      toast.success('Project deleted successfully.');
     } catch (error) {
-      console.error('Error deleting project:', error);
+      toast.error('Error deleting project.');
     }
+    setDeleteDialogOpen(false);
+    setProjectToDelete(null);
+  };
+
+  const handleOpenDeleteDialog = (id: string) => {
+    setProjectToDelete(id);
+    setDeleteDialogOpen(true);
   };
 
   const handleEdit = (project: Project) => {
@@ -115,9 +120,8 @@ const ProjectsTable = () => {
         Add Project
       </Button>
 
-      {/* Add Project Dialog */}
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Add New Project</DialogTitle>
+        <DialogTitle>{newProject?.projectId ? 'Edit Project' : 'Add New Project'}</DialogTitle>
         <DialogContent>
           <TextField
             fullWidth
@@ -135,21 +139,13 @@ const ProjectsTable = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button
-            onClick={() => {
-              setOpenDialog(false);
-              setNewProject({ name: '', description: '', projectId: '' });
-            }}
-          >
-            Cancel
-          </Button>
+          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
           <Button onClick={handleAddProject} variant='contained'>
             {newProject?.projectId ? 'Update' : 'Add'}
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Projects Table */}
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -157,13 +153,15 @@ const ProjectsTable = () => {
               <TableCell>Project Name</TableCell>
               <TableCell>Description</TableCell>
               <TableCell>Status</TableCell>
+              <TableCell>Tasks counts</TableCell>
+              <TableCell>Assigned Users</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {projects.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} align='center'>
+                <TableCell colSpan={5} align='center'>
                   <Typography>No projects found.</Typography>
                 </TableCell>
               </TableRow>
@@ -173,11 +171,20 @@ const ProjectsTable = () => {
                   <TableCell>{project.name}</TableCell>
                   <TableCell>{project.description}</TableCell>
                   <TableCell>{project.isActive ? 'Active' : 'Inactive'}</TableCell>
+                  <TableCell>{project.tasks.length}</TableCell>
+                  <TableCell>
+                    <AvatarGroup max={3}>
+                      {project.assignedUsers?.map((user) => (
+                        <Avatar key={user.id} src={user.avatar} alt={user.name} />
+                      ))}
+                    </AvatarGroup>
+                  </TableCell>
                   <TableCell>
                     <Button onClick={() => handleEdit(project)}>Edit</Button>
-                    <Button disabled={!project.id} onClick={() => handleDeleteProject(project?.id || '')} color='error'>
+                    <Button onClick={() => handleOpenDeleteDialog(project.id)} color='error'>
                       Delete
                     </Button>
+                    <Button onClick={() => navigate(`/viewProject/${project.id}`)}>View</Button>
                   </TableCell>
                 </TableRow>
               ))
@@ -185,6 +192,19 @@ const ProjectsTable = () => {
           </TableBody>
         </Table>
       </TableContainer>
+
+      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to delete this project?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleConfirmDelete} color='error' variant='contained'>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };

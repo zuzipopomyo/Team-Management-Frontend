@@ -80,7 +80,7 @@ type TUser = {
   id: string;
   name: string;
   email: string;
-  role: 'ADMIN' | 'USER';
+  role: 'MANAGER' | 'USER';
   phoneNumber: string;
 };
 
