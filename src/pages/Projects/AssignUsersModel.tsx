@@ -14,12 +14,14 @@ const AssignUsersModel = ({
   showAssignUser,
   setShowAssignUser,
   assignedUsers,
-  projectId
+  projectId,
+  fetchProjects
 }: {
   showAssignUser: boolean;
   setShowAssignUser: React.Dispatch<React.SetStateAction<boolean>>;
   assignedUsers: TUser[];
-  projectId: string;
+  projectId: string | null;
+  fetchProjects: () => void;
 }) => {
   const [users, setUsers] = React.useState<TUser[]>([]);
   const [checked, setChecked] = React.useState<string[]>([]);
@@ -51,6 +53,7 @@ const AssignUsersModel = ({
       });
       console.log('response:', response);
       setShowAssignUser(false);
+      fetchProjects();
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         console.error('Server responded with:', error.response.data);

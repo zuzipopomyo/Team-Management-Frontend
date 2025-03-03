@@ -4,6 +4,7 @@ import { Add } from '@mui/icons-material';
 import {
   Avatar,
   AvatarGroup,
+  Box,
   Button,
   Container,
   Dialog,
@@ -55,7 +56,7 @@ const ProjectsTable = () => {
   const [newProject, setNewProject] = useState<AddProjectFormInitVal>({ name: '', description: '' });
   const [openDialog, setOpenDialog] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
+  const [projectId, setProjectId] = useState<string | null>(null);
   const [showAssignUser, setShowAssignUser] = useState(false);
   const [assignedUsers, setAssignedUsers] = useState<TUser[]>([]);
 
@@ -93,20 +94,20 @@ const ProjectsTable = () => {
   };
 
   const handleConfirmDelete = async () => {
-    if (!projectToDelete) return;
+    if (!projectId) return;
     try {
-      await httpInstance.delete(`/projects/${projectToDelete}`);
-      setProjects((prev) => prev.filter((project) => project.id !== projectToDelete));
+      await httpInstance.delete(`/projects/${projectId}`);
+      setProjects((prev) => prev.filter((project) => project.id !== projectId));
       toast.success('Project deleted successfully.');
     } catch (error) {
       toast.error('Error deleting project.');
     }
     setDeleteDialogOpen(false);
-    setProjectToDelete(null);
+    setProjectId(null);
   };
 
   const handleOpenDeleteDialog = (id: string) => {
-    setProjectToDelete(id);
+    setProjectId(id);
     setDeleteDialogOpen(true);
   };
 
@@ -178,19 +179,22 @@ const ProjectsTable = () => {
                   <TableCell>{project.isActive ? 'Active' : 'Inactive'}</TableCell>
                   <TableCell>{project.tasks.length}</TableCell>
                   <TableCell>
-                    <AvatarGroup sx={{ justifyContent: 'start' }} max={3}>
-                      {project.users?.map((user) => (
-                        <Avatar key={user.id} src={user.name} alt={user.name} />
-                      ))}
+                    <Box display={'flex'}>
+                      <AvatarGroup sx={{ justifyContent: 'start' }} max={3}>
+                        {project.users?.map((user) => (
+                          <Avatar key={user.id} src={user.name} alt={user.name} />
+                        ))}
+                      </AvatarGroup>
                       <IconButton
                         onClick={() => {
                           setShowAssignUser(true);
                           setAssignedUsers(project?.users || []);
+                          setProjectId(project.id);
                         }}
                       >
                         <Add />
                       </IconButton>
-                    </AvatarGroup>
+                    </Box>
                   </TableCell>
                   <TableCell>
                     <Button onClick={() => handleEdit(project)}>Edit</Button>
@@ -208,10 +212,11 @@ const ProjectsTable = () => {
 
       {showAssignUser && (
         <AssignUsersModel
-          projectId={assignedUsers.length > 0 ? assignedUsers[0].projectId : ''}
+          projectId={projectId}
           assignedUsers={assignedUsers}
           setShowAssignUser={setShowAssignUser}
           showAssignUser={showAssignUser}
+          fetchProjects={fetchProjects}
         />
       )}
 
