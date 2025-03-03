@@ -23,7 +23,6 @@ const AssignUsersModel = ({
 }) => {
   const [users, setUsers] = React.useState<TUser[]>([]);
   const [checked, setChecked] = React.useState<string[]>([]);
-
   const handleToggle = (userId: string) => () => {
     const currentIndex = checked.indexOf(userId);
     const newChecked = [...checked];
@@ -37,8 +36,28 @@ const AssignUsersModel = ({
     setChecked(newChecked);
   };
 
-  const handleAssignUnassignUser = () => {
-    // call api and show toast for success or failuer
+  console.log(projectId);
+
+  const handleAssignUnassignUser = async () => {
+    if (!projectId) {
+      console.error('Error: projectId is missing', projectId);
+      return;
+    }
+
+    try {
+      const response = await httpInstance.post('/projects/assignUnassign', {
+        projectId,
+        userIds: checked
+      });
+      console.log('response:', response);
+      setShowAssignUser(false);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        console.error('Server responded with:', error.response.data);
+      } else {
+        console.error('Error assigning users:', error);
+      }
+    }
   };
 
   React.useEffect(() => {

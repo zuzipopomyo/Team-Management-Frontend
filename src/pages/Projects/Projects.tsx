@@ -207,7 +207,12 @@ const ProjectsTable = () => {
       </TableContainer>
 
       {showAssignUser && (
-        <AssignUsersModel assignedUsers={assignedUsers} setShowAssignUser={setShowAssignUser} showAssignUser={showAssignUser} />
+        <AssignUsersModel
+          projectId={assignedUsers.length > 0 ? assignedUsers[0].projectId : ''}
+          assignedUsers={assignedUsers}
+          setShowAssignUser={setShowAssignUser}
+          showAssignUser={showAssignUser}
+        />
       )}
 
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>

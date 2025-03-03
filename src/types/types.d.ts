@@ -77,11 +77,13 @@ interface TaskCardProps {
 }
 
 type TUser = {
+  projectId: string;
   id: string;
   name: string;
   email: string;
   role: 'MANAGER' | 'USER';
   phoneNumber: string;
+  isProfileCompleted: boolean;
 };
 
 type TRegisterRes = {

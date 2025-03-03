@@ -4,8 +4,9 @@ import { ProtectedRoutes } from './components';
 import ManageUsers from './components/App/AppLayout/components/ManageUsers';
 // eslint-disable-next-line import/no-unresolved
 import Home from './pages/Home/Home';
+// eslint-disable-next-line import/default
 import Login from './pages/Login';
-// import Plans from './pages/Plans/Plans';
+import ProfileForm from './pages/ProfileForm';
 import Projects from './pages/Projects/Projects';
 import ViewScreen from './pages/Projects/ViewProject';
 import Register from './pages/Register';
@@ -17,10 +18,10 @@ const AppRouter: React.FC = () => {
       <Routes>
         <Route path='login' element={<Login />} />
         <Route path='register' element={<Register />} />
+        <Route path='/updateProfile/:userId' element={<ProfileForm />} />
 
         <Route path='/' element={<ProtectedRoutes />}>
           <Route path='home' element={<Home />}></Route>
-          {/* <Route path='plans' element={<Plans />}></Route> */}
           <Route path='projects' element={<Projects />}></Route>
           <Route path='manageuser' element={<ManageUsers />}></Route>
           <Route path='/viewProject/:projectId' element={<ViewScreen />} />

@@ -1,7 +1,7 @@
 import { httpInstance } from '@/apis/config/httpInstance';
 import useUserStore from '@/store/userStore';
-import { theme, themeColors } from '@/theme/theme';
-import { ApiMessages, ROUTE, ValidationMessages } from '@/utils/constants';
+import { themeColors } from '@/theme/theme';
+import { ApiMessages, ValidationMessages } from '@/utils/constants';
 import LockIcon from '@mui/icons-material/Lock';
 import { Box, Button, Container, Typography } from '@mui/material';
 import axios from 'axios';
@@ -31,9 +31,17 @@ const Login: React.FC = () => {
 
     try {
       const response: TLoginRes = await httpInstance.post('auth/login', payload);
-      login(response?.data?.user || null);
+      const user = response?.data?.user || null;
+
+      login(user);
       localStorage.setItem('token', response?.data?.tokens?.access?.token || '');
-      navigate('/home');
+
+      if (user?.isProfileCompleted) {
+        navigate('/home');
+      } else {
+        navigate(`/updateProfile/${user.id}`);
+      }
+
       toast.success(ApiMessages.Succcess.save('User'));
       methods.reset();
     } catch (error: any) {
@@ -68,7 +76,7 @@ const Login: React.FC = () => {
             variant='h4'
             gutterBottom
             sx={{
-              borderLeft: '6px solid' + themeColors.primary,
+              borderLeft: `6px solid ${themeColors.primary}`,
               paddingLeft: 1,
               fontWeight: 'bold',
               fontSize: '35px',
@@ -120,7 +128,7 @@ const Login: React.FC = () => {
               fontSize: '14px'
             }}
           >
-            Do not have an account! Register
+            Do not have an account? Register
           </Button>
         </Box>
       </FormProvider>
