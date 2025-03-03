@@ -1,34 +1,32 @@
-/* Full-screen background with gradient animation */
-body {
+/* Full-screen background */
+body, html {
   margin: 0;
   padding: 0;
-  background: linear-gradient(45deg, #ff9a9e, #fad0c4, #ffdde1, #a1c4fd, #c2e9fb);
-  background-size: 400% 400%;
-  animation: gradientBG 10s infinite alternate;
+  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  overflow: hidden;
 }
 
 .love-container {
+  width: 100%;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
   text-align: center;
-  gap: 10px;
-  padding: 100px;
-  border-radius: 40px;
+  transition: background-color 1s ease-in-out;
+  position: relative;
 }
 
-/* Beautiful animated text */
+/* Big animated text */
 .love-text {
   font-family: "cursive", sans-serif;
   font-weight: bold;
-  font-size: 80px;
-  text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.3);
+  font-size: 6rem;
+  text-shadow: 5px 5px 12px rgba(0, 0, 0, 0.3);
   animation: fadeIn 1s ease-in-out, floatUp 3s infinite alternate ease-in-out;
   transition: transform 0.3s ease-in-out;
 }
@@ -37,88 +35,26 @@ body {
   transform: scale(1.1);
 }
 
-/* Random Colors */
-.color-0 {
-  color: #ff4d4d;
+/* Floating Emojis */
+.floating-emoji {
+  position: absolute;
+  animation: floatEmoji linear infinite;
+  opacity: 0.9;
 }
 
-/* Red */
-.color-1 {
-  color: #ff85a2;
-}
-
-/* Pink */
-.color-2 {
-  color: #ffcc5c;
-}
-
-/* Yellow */
-.color-3 {
-  color: #00c2cb;
-}
-
-/* Cyan */
-.color-4 {
-  color: #ff8c42;
-}
-
-/* Orange */
-.color-5 {
-  color: #b39ddb;
-}
-
-/* Lavender */
-.color-6 {
-  color: #76ff7b;
-}
-
-/* Green */
-.color-7 {
-  color: #ff6eb4;
-}
-
-/* Hot Pink */
-.color-8 {
-  color: #8c52ff;
-}
-
-/* Purple */
-.color-9 {
-  color: #ff007f;
-}
-
-/* Magenta */
-
-/* Background gradient animation */
-@keyframes gradientBG {
-  0% {
-    background-position: 0% 50%;
-  }
-
-  100% {
-    background-position: 100% 50%;
-  }
+@keyframes floatEmoji {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  50% { transform: translateY(-20px) rotate(10deg); opacity: 0.7; }
+  100% { transform: translateY(-40px) rotate(-10deg); opacity: 0.9; }
 }
 
 /* Text animations */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes floatUp {
-  from {
-    transform: translateY(0px);
-  }
-
-  to {
-    transform: translateY(-10px);
-  }
+  from { transform: translateY(0px); }
+  to { transform: translateY(-10px); }
 }
